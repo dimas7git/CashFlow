@@ -1,0 +1,52 @@
+import React, { useEffect, useState } from 'react';
+import { View, FlatList, StyleSheet, Text } from 'react-native';
+import ExpenseItem from './components/ExpenseItem';
+import FooterButtons from './components/FooterButtons';
+import AddExpenseForm from './components/AddExpenseForm';
+import { createTable, addExpense, getExpenses } from './database';
+import AppNavigator from './app/AppNavigator';
+
+export default function App() {
+  const [expenses, setExpenses] = useState([]);
+  const [revenues, setRevenues] = useState([]);
+
+  useEffect(() => {
+    const initializeDatabase = async () => {
+      await createTable();
+      loadExpenses();
+    };
+
+    initializeDatabase();
+  }, []);
+
+  const loadExpenses = async () => {
+    const data = await getExpenses();
+    setExpenses(data.filter(item => item.type === 'expense'));
+    setRevenues(data.filter(item => item.type === 'revenue'));
+  };
+
+  const handleAddItem = async (category, amount, type) => {
+    await addExpense(category, amount, type);
+    loadExpenses();
+  };
+
+  return (
+    <View style={styles.container}>
+      <AppNavigator />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'space-between',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+});
